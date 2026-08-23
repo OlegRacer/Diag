@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CarPlay Web Remote</title>
+    <title>CarPlay Shortcuts Remote</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -58,91 +58,35 @@
 
     <div class="player-card">
         <h2>CarPlay Пульт</h2>
-        <p>Керування Flacbox</p>
+        <p>Через додаток «Команди»</p>
         
         <div class="controls">
             <button id="prev">⏮</button>
-            <button id="playPause" class="play-btn">▶</button>
+            <button id="playPause" class="play-btn">⏯</button>
             <button id="next">⏭</button>
         </div>
     </div>
 
     <script>
-        // Необхідний елемент аудіо для активації медіаконтексту в iOS
-        const dummyAudio = new Audio();
-        // Коротка тиша в форматі data URI, щоб iOS дозволила запустити аудіосесію
-        dummyAudio.src = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=";
-        
-        let isPlaying = false;
-        const playPauseBtn = document.getElementById('playPause');
-
-        // Ініціалізація Media Session API
-        if ('mediaSession' in navigator) {
-            
-            // Оновлюємо метадані (можна змінити на реальні, якщо читаєте їх)
-            navigator.mediaSession.metadata = new MediaMetadata({
-                title: 'Flacbox Трек',
-                artist: 'Автомобільний режим',
-                album: 'Web Remote'
-            });
-
-            // Дії при натисканні кнопок у системі або на вашому пульті
-            navigator.mediaSession.setActionHandler('play', function() {
-                dummyAudio.play().catch(e => console.log(e));
-                isPlaying = true;
-                playPauseBtn.textContent = '⏸';
-            });
-
-            navigator.mediaSession.setActionHandler('pause', function() {
-                dummyAudio.pause();
-                isPlaying = false;
-                playPauseBtn.textContent = '▶';
-            });
-
-            navigator.mediaSession.setActionHandler('previoustrack', function() {
-                console.log('Попередній трек');
-                // Тут можна додати візуальний відгук
-            });
-
-            navigator.mediaSession.setActionHandler('nexttrack', function() {
-                console.log('Наступний трек');
-            });
+        // Функція для запуску системної команди iOS
+        function runShortcut(shortcutName) {
+            const url = `shortcuts://run-shortcut?name=${encodeURIComponent(shortcutName)}`;
+            window.location.href = url;
         }
 
-        // Обробники кліків на кнопки на вашій вебсторінці
-        playPauseBtn.addEventListener('click', async () => {
-            if (!isPlaying) {
-                try {
-                    await dummyAudio.play();
-                    isPlaying = true;
-                    playPauseBtn.textContent = '⏸';
-                    if ('mediaSession' in navigator) {
-                        navigator.mediaSession.playbackState = 'playing';
-                    }
-                } catch (err) {
-                    console.log("Помилка активації аудіо:", err);
-                }
-            } else {
-                dummyAudio.pause();
-                isPlaying = false;
-                playPauseBtn.textContent = '▶';
-                if ('mediaSession' in navigator) {
-                    navigator.mediaSession.playbackState = 'paused';
-                }
-            }
-        });
-
-        document.getElementById('prev').addEventListener('click', () => {
-            if ('mediaSession' in navigator && navigator.mediaSession.setActionHandler) {
-                // Штучно викликаємо дію попереднього треку
-                try { navigator.mediaSession.setActionHandler('previoustrack')(); } catch(e){}
-            }
+        document.getElementById('playPause').addEventListener('click', () => {
+            // Назва вашої команди в додатку "Команди" для паузи/плеєра
+            runShortcut('FlacboxPlay');
         });
 
         document.getElementById('next').addEventListener('click', () => {
-            if ('mediaSession' in navigator && navigator.mediaSession.setActionHandler) {
-                try { navigator.mediaSession.setActionHandler('nexttrack')(); } catch(e){}
-            }
+            // Назва вашої команди для наступного треку
+            runShortcut('FlacboxNext');
+        });
+
+        document.getElementById('prev').addEventListener('click', () => {
+            // За бажанням створіть команду FlacboxPrev і додайте сюди
+            // runShortcut('FlacboxPrev');
         });
     </script>
 </body>
